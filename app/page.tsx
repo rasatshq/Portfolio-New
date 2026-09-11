@@ -20,7 +20,6 @@ import {
   MapPin,
   ChevronRight,
   Monitor,
-  Phone,
   Globe,
   Languages as LanguagesIcon,
 } from "lucide-react";
@@ -427,7 +426,7 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* Section 01: About Me */}
+        {/* Section 01: About Me (3 Kolom Kontak Bersih Tanpa No WhatsApp) */}
         <section id="about" className="space-y-6 scroll-mt-28">
           <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-widest uppercase">
             <TerminalIcon className="w-4 h-4" />
@@ -455,8 +454,8 @@ export default function Portfolio() {
               </p>
             </div>
 
-            {/* 4 Contact Info Columns */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-white/10 text-center">
+            {/* 3 Kolom Info Kontak Tanpa WhatsApp */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-white/10 text-center">
               <div className="space-y-2 flex flex-col items-center">
                 <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
                   <MapPin className="w-5 h-5" />
@@ -476,18 +475,6 @@ export default function Portfolio() {
                 <span className="text-xs text-slate-400 font-light">Email</span>
                 <p className="text-xs sm:text-sm font-semibold text-white break-all">
                   rashadshaq17@gmail.com
-                </p>
-              </div>
-
-              <div className="space-y-2 flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <span className="text-xs text-slate-400 font-light">
-                  WhatsApp
-                </span>
-                <p className="text-xs sm:text-sm font-semibold text-white font-mono">
-                  085715906289
                 </p>
               </div>
 
@@ -672,7 +659,7 @@ export default function Portfolio() {
           )}
         </section>
 
-        {/* Section 05: Languages (Sesuai Gambar Referensi 2) */}
+        {/* Section 05: Languages */}
         <section id="languages" className="space-y-4 scroll-mt-28">
           <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-widest uppercase">
             <Globe className="w-4 h-4" />
