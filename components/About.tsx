@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import { Terminal as TerminalIcon, MapPin, Mail, Globe, Copy, Check } from "lucide-react";
+import { PROFILE } from "@/constants/profile";
 
 export function About() {
   const [emailCopied, setEmailCopied] = useState(false);
 
   const copyEmailToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText("rashadshaq17@gmail.com");
+      await navigator.clipboard.writeText(PROFILE.email);
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2500);
     } catch (err) {
@@ -50,7 +51,7 @@ export function About() {
             </div>
             <span className="text-xs text-slate-500 font-normal">Location</span>
             <p className="text-xs sm:text-sm font-semibold text-slate-900">
-              Bandung, West Java
+              {PROFILE.location}
             </p>
           </div>
 
@@ -74,7 +75,7 @@ export function About() {
               </span>
             </span>
             <p className="text-xs sm:text-sm font-semibold text-slate-900 break-all flex items-center gap-1.5 group-hover:text-cyan-600 transition-colors">
-              rashadshaq17@gmail.com
+              {PROFILE.email}
               {emailCopied ? (
                 <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               ) : (
@@ -102,3 +103,4 @@ export function About() {
     </section>
   );
 }
+

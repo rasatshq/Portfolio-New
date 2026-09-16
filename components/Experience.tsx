@@ -1,6 +1,8 @@
 import React from "react";
 import { GraduationCap, ArrowUpRight, Calendar, Briefcase, MapPin } from "lucide-react";
 import type { ExperienceItem } from "@/types/portfolio";
+import { PROFILE } from "@/constants/profile";
+
 
 const experienceAndEducation: ExperienceItem[] = [
   {
@@ -49,7 +51,7 @@ export function Experience() {
           02. Education &amp; Experience
         </h2>
         <a
-          href="/cv-rashad-shaquille-taofik.pdf"
+          href={PROFILE.cvUrl}
           target="_blank"
           rel="noreferrer"
           className="text-xs font-mono text-cyan-600 hover:text-cyan-700 flex items-center gap-1.5 transition-colors font-medium"

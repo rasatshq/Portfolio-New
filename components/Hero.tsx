@@ -4,19 +4,21 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Sparkles, MapPin, FileText, Mail, Copy, Check, Monitor } from "lucide-react";
 import { GithubIcon } from "./Icons";
+import { PROFILE } from "@/constants/profile";
 
 export function Hero() {
   const [emailCopied, setEmailCopied] = useState(false);
 
   const copyEmailToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText("rashadshaq17@gmail.com");
+      await navigator.clipboard.writeText(PROFILE.email);
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2500);
     } catch (err) {
       console.error("Failed to copy email:", err);
     }
   };
+
 
   return (
     <section className="space-y-12">
@@ -46,12 +48,12 @@ export function Hero() {
 
           <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-mono text-slate-600">
             <MapPin className="w-4 h-4 text-cyan-600" />
-            <span>Bandung, West Java</span>
+            <span>{PROFILE.location}</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-3">
             <a
-              href="/cv-rashad-shaquille-taofik.pdf"
+              href={PROFILE.cvUrl}
               target="_blank"
               rel="noreferrer"
               className="px-6 py-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs tracking-wider uppercase transition-all transform hover:-translate-y-0.5 shadow-lg shadow-cyan-500/25 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -60,7 +62,7 @@ export function Hero() {
               Download CV
             </a>
             <a
-              href="mailto:rashadshaq17@gmail.com"
+              href={`mailto:${PROFILE.email}`}
               className="px-5 py-3 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs tracking-wider uppercase transition-all transform hover:-translate-y-0.5 flex items-center gap-2 shadow-sm hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
             >
               <Mail className="w-4 h-4" />
@@ -85,7 +87,7 @@ export function Hero() {
               )}
             </button>
             <a
-              href="https://github.com/rasatshq"
+              href={PROFILE.github}
               target="_blank"
               rel="noreferrer"
               className="px-5 py-3 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs tracking-wider uppercase transition-all transform hover:-translate-y-0.5 flex items-center gap-2 shadow-sm hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -141,14 +143,14 @@ export function Hero() {
           <p className="pl-5">
             name:{" "}
             <span className="text-emerald-400">
-              &quot;Rashad Shaquille Taofik&quot;
+              &quot;{PROFILE.name}&quot;
             </span>
             ,
           </p>
           <p className="pl-5">
             university:{" "}
             <span className="text-emerald-400">
-              &quot;Universitas Komputer Indonesia (UNIKOM)&quot;
+              &quot;{PROFILE.university}&quot;
             </span>
             ,
           </p>

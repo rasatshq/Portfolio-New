@@ -3,8 +3,8 @@ import { Globe, Languages as LanguagesIcon } from "lucide-react";
 
 const languagesList = [
   "Indonesian (Native)",
-  "Arabic (Intermediate/Mid-Level)",
-  "English (Basic)",
+  "Arabic (Intermediate / Mid-Level)",
+  "English (Intermediate)",
 ];
 
 export function Languages() {

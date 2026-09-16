@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { PROFILE } from "@/constants/profile";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -14,25 +15,36 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// Single source of truth for the canonical site URL.
+// Set NEXT_PUBLIC_SITE_URL in your deployment environment (e.g. Vercel).
+// See .env.example for details.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://portfolio-rashad.vercel.app";
+
+if (!process.env.NEXT_PUBLIC_SITE_URL) {
+  console.warn(
+    "[layout] NEXT_PUBLIC_SITE_URL is not set — " +
+      "falling back to hardcoded URL for metadataBase and OG tags. " +
+      "Set this env var in your deployment to avoid incorrect canonical URLs."
+  );
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio-rashad.vercel.app"
-  ),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Rashad Shaquille Taofik | Developer Portfolio",
-    template: "%s | Rashad Shaquille Taofik",
+    default: `${PROFILE.name} | Developer Portfolio`,
+    template: `%s | ${PROFILE.name}`,
   },
   description:
     "Informatics Engineering Student at Universitas Komputer Indonesia (UNIKOM) & AI Enthusiast specializing in Data Science, Web Architecture, and Cisco Network Infrastructure.",
-  applicationName: "Rashad Shaquille Taofik Portfolio",
+  applicationName: `${PROFILE.name} Portfolio`,
   authors: [
     {
-      name: "Rashad Shaquille Taofik",
-      url: "https://github.com/rasatshq",
+      name: PROFILE.name,
+      url: PROFILE.github,
     },
   ],
-  creator: "Rashad Shaquille Taofik",
-  publisher: "Rashad Shaquille Taofik",
+  creator: PROFILE.name,
+  publisher: PROFILE.name,
   keywords: [
     "Rashad Shaquille Taofik",
     "Rashad Portfolio",
@@ -45,7 +57,7 @@ export const metadata: Metadata = {
     "Web Development",
     "Cisco Packet Tracer",
     "VLSM",
-    "Generative AI",
+    "Gemini API",
     "Frontend Developer",
     "Bandung",
     "Bekasi",
@@ -56,15 +68,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://portfolio-rashad.vercel.app",
-    title: "Rashad Shaquille Taofik | Developer Portfolio",
+    url: siteUrl,
+    title: `${PROFILE.name} | Developer Portfolio`,
     description:
       "Informatics Engineering Student at UNIKOM & AI Enthusiast. Integrating software logic, data-driven solutions, and network infrastructure.",
-    siteName: "Rashad Shaquille Taofik Portfolio",
+    siteName: `${PROFILE.name} Portfolio`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rashad Shaquille Taofik | Developer Portfolio",
+    title: `${PROFILE.name} | Developer Portfolio`,
     description:
       "Informatics Engineering Student at UNIKOM & AI Enthusiast. Integrating software logic, data-driven solutions, and network infrastructure.",
     creator: "@rasatshq",

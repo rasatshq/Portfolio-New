@@ -39,9 +39,9 @@ const techStack: TechSkill[] = [
     desc: "Workflow & collaboration",
   },
   {
-    name: "Generative AI",
-    category: "Productivity",
-    desc: "AI-first workflow speed",
+    name: "Gemini / ChatGPT",
+    category: "AI Tooling",
+    desc: "Prompt eng & API integration",
   },
 ];
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Menu, X, ChevronRight } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "./Icons";
+import { PROFILE } from "@/constants/profile";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,7 +59,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-2 sm:gap-2.5">
           <a
-            href="/cv-rashad-shaquille-taofik.pdf"
+            href={PROFILE.cvUrl}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium bg-cyan-50 hover:bg-cyan-500 text-cyan-700 hover:text-white border border-cyan-200 hover:border-cyan-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -68,7 +69,7 @@ export function Navbar() {
             <span>Resume</span>
           </a>
           <a
-            href="https://github.com/rasatshq"
+            href={PROFILE.github}
             target="_blank"
             rel="noreferrer"
             className="p-2 rounded-full hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -77,7 +78,7 @@ export function Navbar() {
             <GithubIcon className="w-4 h-4" />
           </a>
           <a
-            href="https://www.linkedin.com/in/rashad-shaquille-taofik"
+            href={PROFILE.linkedin}
             target="_blank"
             rel="noreferrer"
             className="p-2 rounded-full hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -108,7 +109,7 @@ export function Navbar() {
           ))}
           <div className="flex gap-2 pt-1">
             <a
-              href="/cv-rashad-shaquille-taofik.pdf"
+              href={PROFILE.cvUrl}
               target="_blank"
               rel="noreferrer"
               className="flex-1 text-center py-2.5 rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-bold text-xs font-mono transition flex items-center justify-center gap-1.5"
@@ -117,7 +118,7 @@ export function Navbar() {
               Resume
             </a>
             <a
-              href="mailto:rashadshaq17@gmail.com"
+              href={`mailto:${PROFILE.email}`}
               className="flex-1 text-center py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs font-mono transition"
             >
               Message
@@ -128,3 +129,4 @@ export function Navbar() {
     </header>
   );
 }
+

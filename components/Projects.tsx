@@ -34,7 +34,6 @@ const projects: Project[] = [
     description:
       "A responsive web-based interactive music player featuring dynamic audio playback controls, sleek UI/UX aesthetics, and structured local asset pathing.",
     tags: ["JavaScript", "HTML5", "CSS3", "Audio UI"],
-    githubUrl: "https://github.com/rasatshq",
     accent: "from-amber-500/10 via-orange-500/[0.03] to-white",
     glow: "hover:border-amber-500/50 hover:shadow-amber-500/10",
   },
@@ -116,8 +115,8 @@ export function Projects() {
                     <ArrowUpRight className="w-4 h-4" />
                   </a>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-200 font-medium">
-                    Academic Lab
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium">
+                    No Public Repo
                   </span>
                 )}
               </div>
