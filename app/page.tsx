@@ -7,6 +7,7 @@ import { TechStack } from "@/components/TechStack";
 import { Projects } from "@/components/Projects";
 import { GitHubRepos } from "@/components/GitHubRepos";
 import { Languages } from "@/components/Languages";
+import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 
 export default function Portfolio() {
@@ -38,6 +39,7 @@ export default function Portfolio() {
         <Projects />
         <GitHubRepos />
         <Languages />
+        <Contact />
       </main>
 
       {/* Footer */}

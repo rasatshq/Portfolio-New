@@ -26,6 +26,7 @@ export function Navbar() {
     { label: "Projects", href: "#projects" },
     { label: "GitHub", href: "#github" },
     { label: "Languages", href: "#languages" },
+    { label: "Contact", href: "#contact" },
   ];
 
   return (
@@ -129,4 +130,3 @@ export function Navbar() {
     </header>
   );
 }
-
