@@ -5,7 +5,12 @@ import { PROFILE } from "@/constants/profile";
 
 export function Contact() {
   return (
-    <section id="contact" className="scroll-mt-28">
+    <section id="contact" className="space-y-4 scroll-mt-28">
+      <h2 className="flex items-center gap-2 text-xs font-mono text-cyan-600 tracking-widest uppercase font-semibold">
+        <MessageCircle className="w-4 h-4" />
+        07. Let&apos;s Connect
+      </h2>
+
       <div className="relative overflow-hidden rounded-[2rem] border border-cyan-200/80 bg-gradient-to-br from-cyan-50 via-white to-indigo-50 p-8 shadow-xl shadow-cyan-100/50 sm:p-12">
         <div
           className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-cyan-300/20 blur-3xl"
@@ -18,13 +23,9 @@ export function Contact() {
 
         <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-2xl space-y-4">
-            <p className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-widest text-cyan-700">
-              <MessageCircle className="h-4 w-4" />
-              07. Let&apos;s connect
-            </p>
-            <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            <h3 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
               Have a project, idea, or problem to solve?
-            </h2>
+            </h3>
             <p className="max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
               I&apos;m open to thoughtful collaborations, student projects, and
               opportunities to build practical products with software, data, and
