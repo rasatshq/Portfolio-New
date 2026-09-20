@@ -61,6 +61,17 @@ const projects: Project[] = [
     glow: "hover:border-emerald-500/50 hover:shadow-emerald-500/10",
   },
   {
+    title: "Judol Sentinel",
+    category: "Data Science",
+    type: "NLP / Deep Learning",
+    description:
+      "Deep Learning text classification system using Bidirectional LSTM to detect Indonesian online gambling (judol) promotions. Features a de-obfuscation pipeline to handle intentionally mangled text, trained on a real Indonesian dataset, and deployed as a Cyber SOC monitoring dashboard with Streamlit.",
+    tags: ["Python", "BiLSTM", "Keras", "Streamlit", "NLP", "Deep Learning"],
+    githubUrl: "https://github.com/rasatshq/indonesian-judol-bilstm",
+    accent: "from-rose-500/10 via-red-500/[0.03] to-white",
+    glow: "hover:border-rose-500/50 hover:shadow-rose-500/10",
+  },
+  {
     title: "Data Science & Processing Lab",
     category: "Data Science",
     type: "Data Pipeline",

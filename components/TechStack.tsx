@@ -9,6 +9,11 @@ const techStack: TechSkill[] = [
     desc: "Data analysis & scripting",
   },
   {
+    name: "Keras / TensorFlow",
+    category: "Deep Learning",
+    desc: "BiLSTM & NLP models",
+  },
+  {
     name: "PHP",
     category: "Backend Architecture",
     desc: "Server-side web apps",
