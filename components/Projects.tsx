@@ -6,6 +6,17 @@ import type { Project } from "@/types/portfolio";
 
 const projects: Project[] = [
   {
+    title: "Prince E-Commerce",
+    category: "Full Stack",
+    type: "Full Stack Web App",
+    description:
+      "Full-stack e-commerce platform built with Laravel 12, Livewire 3, and Filament 5. Features product variant & size stock management, seamless guest-to-user cart merge, Midtrans Snap payment gateway integration, and a complete admin panel for order and inventory management.",
+    tags: ["Laravel 12", "Livewire 3", "Filament 5", "MySQL", "Midtrans", "PHP"],
+    githubUrl: "https://github.com/rasatshq/prince-ecommerce",
+    accent: "from-violet-500/10 via-purple-500/[0.03] to-white",
+    glow: "hover:border-violet-500/50 hover:shadow-violet-500/10",
+  },
+  {
     title: "Aplikasi POS Kasir",
     category: "Frontend",
     type: "Web POS System",
@@ -77,7 +88,7 @@ export function Projects() {
 
         {/* Filter Tabs */}
         <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-100 border border-slate-200/80 text-xs font-mono">
-          {["All", "Frontend", "Networking", "Data Science"].map((tab) => (
+          {["All", "Full Stack", "Frontend", "Networking", "Data Science"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

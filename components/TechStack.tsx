@@ -14,6 +14,11 @@ const techStack: TechSkill[] = [
     desc: "Server-side web apps",
   },
   {
+    name: "Laravel",
+    category: "Full Stack Framework",
+    desc: "MVC, Livewire & Filament",
+  },
+  {
     name: "JavaScript",
     category: "Frontend Interactive",
     desc: "Modern UI mechanics",
