@@ -1,9 +1,29 @@
-﻿import type { Repository } from "@/types/portfolio";
+import type { Repository } from "@/types/portfolio";
 
 const GITHUB_REPOSITORIES_URL =
   "https://api.github.com/users/rasatshq/repos?sort=updated&per_page=4";
 
 export const FALLBACK_REPOSITORIES: Repository[] = [
+  {
+    id: 103,
+    name: "indonesian-judol-bilstm",
+    description:
+      "Deep Learning BiLSTM text classifier to detect Indonesian online gambling (judol) promotions, with de-obfuscation pipeline and Streamlit SOC dashboard.",
+    html_url: "https://github.com/rasatshq/indonesian-judol-bilstm",
+    stargazers_count: 0,
+    language: "Python",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 104,
+    name: "prince-ecommerce",
+    description:
+      "Full-stack e-commerce platform with Laravel 12, Livewire 3, Filament 5, product variant stock, guest-to-user cart merge, and Midtrans Snap checkout.",
+    html_url: "https://github.com/rasatshq/prince-ecommerce",
+    stargazers_count: 0,
+    language: "PHP",
+    updated_at: new Date().toISOString(),
+  },
   {
     id: 100,
     name: "Aplikasi-Pos-kasir",
@@ -22,16 +42,6 @@ export const FALLBACK_REPOSITORIES: Repository[] = [
     html_url: "https://github.com/rasatshq/cafe-manjaro",
     stargazers_count: 1,
     language: "JavaScript",
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 102,
-    name: "Portfolio-New",
-    description:
-      "Modern high-performance developer portfolio built with Next.js 16, React 19, and Tailwind CSS v4.",
-    html_url: "https://github.com/rasatshq/Portfolio-New",
-    stargazers_count: 1,
-    language: "TypeScript",
     updated_at: new Date().toISOString(),
   },
 ];
