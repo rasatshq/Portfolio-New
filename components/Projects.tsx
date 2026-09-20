@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
+import { Cpu, ArrowUpRight, Star } from "lucide-react";
 import type { Project } from "@/types/portfolio";
 
 const projects: Project[] = [
@@ -13,6 +14,7 @@ const projects: Project[] = [
       "Full-stack e-commerce platform built with Laravel 12, Livewire 3, and Filament 5. Features product variant & size stock management, seamless guest-to-user cart merge, Midtrans Snap payment gateway integration, and a complete admin panel for order and inventory management.",
     tags: ["Laravel 12", "Livewire 3", "Filament 5", "MySQL", "Midtrans", "PHP"],
     githubUrl: "https://github.com/rasatshq/prince-ecommerce",
+    image: "/prince-ecommerce.png",
     accent: "from-violet-500/10 via-purple-500/[0.03] to-white",
     glow: "hover:border-violet-500/50 hover:shadow-violet-500/10",
   },
@@ -78,6 +80,9 @@ export function Projects() {
       ? projects
       : projects.filter((p) => p.category === activeTab);
 
+  const featuredProject = filteredProjects.find((p) => p.image);
+  const gridProjects = filteredProjects.filter((p) => !p.image);
+
   return (
     <section id="projects" className="space-y-6 scroll-mt-28">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -104,56 +109,128 @@ export function Projects() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredProjects.map((project, idx) => (
-          <div
-            key={idx}
-            className={`group p-6 sm:p-7 rounded-3xl border border-slate-200/80 bg-gradient-to-b ${project.accent} shadow-xl shadow-slate-200/40 backdrop-blur-md transition-all duration-300 hover:scale-[1.01] ${project.glow} flex flex-col justify-between space-y-6`}
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-medium">
-                  {project.type}
-                </span>
-                {project.githubUrl ? (
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                    aria-label={`View ${project.title} repository`}
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium">
-                    No Public Repo
-                  </span>
-                )}
+      {/* Featured Project — full-width with screenshot */}
+      {featuredProject && (
+        <div
+          className={`group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br ${featuredProject.accent} shadow-xl shadow-slate-200/40 backdrop-blur-md transition-all duration-300 ${featuredProject.glow}`}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Left: content */}
+            <div className="flex flex-col justify-between p-7 sm:p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-medium">
+                      {featuredProject.type}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 font-semibold">
+                      <Star className="w-2.5 h-2.5" />
+                      Featured
+                    </span>
+                  </div>
+                  {featuredProject.githubUrl && (
+                    <a
+                      href={featuredProject.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                      aria-label={`View ${featuredProject.title} repository`}
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 group-hover:text-violet-600 transition-colors">
+                  {featuredProject.title}
+                </h3>
+
+                <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                  {featuredProject.description}
+                </p>
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">
-                {project.title}
-              </h3>
-
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                {project.description}
-              </p>
+              <div className="flex flex-wrap gap-1.5 pt-4 border-t border-slate-100">
+                {featuredProject.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pt-4 border-t border-slate-100">
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60"
-                >
-                  {tag}
-                </span>
-              ))}
+            {/* Right: screenshot */}
+            <div className="relative hidden lg:block overflow-hidden rounded-r-3xl border-l border-slate-200/60">
+              <Image
+                src={featuredProject.image!}
+                alt={`${featuredProject.title} screenshot`}
+                fill
+                className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                sizes="(max-width: 1024px) 0px, 50vw"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Regular project grid */}
+      {gridProjects.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {gridProjects.map((project, idx) => (
+            <div
+              key={idx}
+              className={`group p-6 sm:p-7 rounded-3xl border border-slate-200/80 bg-gradient-to-b ${project.accent} shadow-xl shadow-slate-200/40 backdrop-blur-md transition-all duration-300 hover:scale-[1.01] ${project.glow} flex flex-col justify-between space-y-6`}
+            >
+              <div className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-medium">
+                    {project.type}
+                  </span>
+                  {project.githubUrl ? (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                      aria-label={`View ${project.title} repository`}
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium">
+                      No Public Repo
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">
+                  {project.title}
+                </h3>
+
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  {project.description}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-4 border-t border-slate-100">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/60"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
