@@ -174,16 +174,16 @@ export function Projects() {
             </div>
 
             {/* Right: screenshot */}
-            <div className="relative hidden lg:block overflow-hidden rounded-r-3xl border-l border-slate-200/60">
+            <div className="relative h-64 sm:h-80 lg:h-auto overflow-hidden rounded-b-3xl lg:rounded-r-3xl lg:rounded-bl-none border-t lg:border-t-0 lg:border-l border-slate-200/60">
               <Image
                 src={featuredProject.image!}
                 alt={`${featuredProject.title} screenshot`}
                 fill
                 className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-                sizes="(max-width: 1024px) 0px, 50vw"
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-slate-900/10 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
         </div>

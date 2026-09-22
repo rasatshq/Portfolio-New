@@ -74,14 +74,14 @@ export function About() {
                 {emailCopied ? "(Copied!)" : "(Click to copy)"}
               </span>
             </span>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900 break-all flex items-center gap-1.5 group-hover:text-cyan-600 transition-colors">
+            <span className="text-xs sm:text-sm font-semibold text-slate-900 break-all flex items-center gap-1.5 group-hover:text-cyan-600 transition-colors">
               {PROFILE.email}
               {emailCopied ? (
                 <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               ) : (
                 <Copy className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-600 transition shrink-0" />
               )}
-            </p>
+            </span>
             {emailCopied && (
               <span className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-mono font-bold shadow-lg">
                 Copied!

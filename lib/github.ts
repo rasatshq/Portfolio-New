@@ -12,7 +12,7 @@ export const FALLBACK_REPOSITORIES: Repository[] = [
     html_url: "https://github.com/rasatshq/indonesian-judol-bilstm",
     stargazers_count: 0,
     language: "Python",
-    updated_at: new Date().toISOString(),
+    updated_at: "2025-02-18T14:30:00Z",
   },
   {
     id: 104,
@@ -22,7 +22,7 @@ export const FALLBACK_REPOSITORIES: Repository[] = [
     html_url: "https://github.com/rasatshq/prince-ecommerce",
     stargazers_count: 0,
     language: "PHP",
-    updated_at: new Date().toISOString(),
+    updated_at: "2025-02-10T09:15:00Z",
   },
   {
     id: 100,
@@ -32,7 +32,7 @@ export const FALLBACK_REPOSITORIES: Repository[] = [
     html_url: "https://github.com/rasatshq/Aplikasi-Pos-kasir",
     stargazers_count: 0,
     language: "JavaScript",
-    updated_at: new Date().toISOString(),
+    updated_at: "2024-11-25T16:45:00Z",
   },
   {
     id: 101,
@@ -42,7 +42,7 @@ export const FALLBACK_REPOSITORIES: Repository[] = [
     html_url: "https://github.com/rasatshq/cafe-manjaro",
     stargazers_count: 1,
     language: "JavaScript",
-    updated_at: new Date().toISOString(),
+    updated_at: "2024-10-14T11:20:00Z",
   },
 ];
 
