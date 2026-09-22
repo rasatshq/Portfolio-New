@@ -16,6 +16,8 @@ export interface Project {
   tags: string[];
   githubUrl?: string;
   image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   accent: string;
   glow: string;
 }

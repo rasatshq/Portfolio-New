@@ -1,5 +1,5 @@
 import React from "react";
-import { GraduationCap, ArrowUpRight, Calendar, Briefcase, MapPin } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { ExperienceItem } from "@/types/portfolio";
 import { PROFILE } from "@/constants/profile";
 
@@ -44,77 +44,9 @@ const experienceAndEducation: ExperienceItem[] = [
 
 export function Experience() {
   return (
-    <section id="experience" className="space-y-6 scroll-mt-28">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="flex items-center gap-2 text-xs font-mono text-cyan-600 tracking-widest uppercase font-semibold">
-          <GraduationCap className="w-4 h-4" />
-          02. Education &amp; Experience
-        </h2>
-        <a
-          href={PROFILE.cvUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-mono text-cyan-600 hover:text-cyan-700 flex items-center gap-1.5 transition-colors font-medium"
-        >
-          Full Curriculum Vitae <ArrowUpRight className="w-3.5 h-3.5" />
-        </a>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {experienceAndEducation.map((item, idx) => (
-          <div
-            key={idx}
-            className={`p-7 sm:p-8 rounded-3xl border border-slate-200/80 bg-gradient-to-b ${item.accent} backdrop-blur-xl shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-6 group hover:border-cyan-400/60 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-300`}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span
-                  className={`text-[10px] font-mono px-3 py-1 rounded-full border font-medium ${item.badgeColor}`}
-                >
-                  {item.type}
-                </span>
-                <span className="flex items-center gap-1.5 text-xs font-mono text-slate-600">
-                  <Calendar className="w-3.5 h-3.5 text-cyan-600" />
-                  {item.period}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">
-                  {item.role}
-                </h3>
-                <p className="text-sm font-semibold text-slate-800 mt-1 flex items-center gap-1.5">
-                  {item.type === "Education" ? (
-                    <GraduationCap className="w-4 h-4 text-cyan-600 shrink-0" />
-                  ) : (
-                    <Briefcase className="w-4 h-4 text-indigo-600 shrink-0" />
-                  )}
-                  <span>{item.institution}</span>
-                </p>
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-mono">
-                  <MapPin className="w-3.5 h-3.5 text-cyan-600" />
-                  {item.location}
-                </p>
-              </div>
-
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                {item.description}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 pt-4 border-t border-slate-100">
-              {item.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200/70"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+    <section id="experience" className="section-spacing experience-section">
+      <div className="section-heading"><div><p className="eyebrow">03 / THE JOURNEY</p><h2 className="section-title">Learning. Teaching.<br /><em>Moving forward.</em></h2></div><a className="button-text" href={PROFILE.cvUrl} target="_blank" rel="noreferrer">Full Curriculum Vitae <ArrowUpRight size={17} /></a></div>
+      <div className="timeline">{experienceAndEducation.map(item => <article key={item.role} className="timeline-row"><div className="timeline-date"><span className="eyebrow">{item.type}</span><p>{item.period}</p></div><div><h3>{item.role}</h3><p className="institution">{item.institution}</p><p className="timeline-location">{item.location}</p><p className="timeline-description">{item.description}</p><div className="tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div></div></article>)}</div>
     </section>
   );
 }

@@ -1,8 +1,23 @@
 import React from "react";
-import { Layers } from "lucide-react";
+
 import type { TechSkill } from "@/types/portfolio";
 
 const techStack: TechSkill[] = [
+  {
+    name: "Next.js / React",
+    category: "Web Architecture",
+    desc: "Modern SSR, App Router & UI",
+  },
+  {
+    name: "TypeScript",
+    category: "Type Safety",
+    desc: "Robust full-stack typing",
+  },
+  {
+    name: "Tailwind CSS",
+    category: "Design System",
+    desc: "Responsive & utility-first UI",
+  },
   {
     name: "Python",
     category: "Data & Core",
@@ -55,33 +70,51 @@ const techStack: TechSkill[] = [
   },
 ];
 
+const groups = [
+  {
+    title: "Web & software",
+    names: [
+      "Next.js / React",
+      "TypeScript",
+      "Tailwind CSS",
+      "PHP",
+      "Laravel",
+      "JavaScript",
+      "HTML5 / CSS3",
+      "MySQL",
+    ],
+  },
+  {
+    title: "Data & intelligence",
+    names: ["Python", "Keras / TensorFlow", "Gemini / ChatGPT"],
+  },
+  {
+    title: "Infrastructure & workflow",
+    names: ["Cisco Packet Tracer", "Git & GitHub"],
+  },
+];
 export function TechStack() {
   return (
-    <section id="skills" className="space-y-6 scroll-mt-28">
-      <h2 className="flex items-center gap-2 text-xs font-mono text-cyan-600 tracking-widest uppercase font-semibold">
-        <Layers className="w-4 h-4" />
-        03. Tech Arsenal &amp; Skills
-      </h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {techStack.map((tech) => (
-          <div
-            key={tech.name}
-            className="p-5 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm hover:shadow-md hover:border-cyan-500/50 hover:bg-cyan-50/20 transition-all duration-300 flex flex-col justify-between group"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-slate-900 group-hover:text-cyan-600 transition-colors">
-                  {tech.name}
-                </span>
-                <span className="text-[10px] font-mono text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200 font-medium whitespace-nowrap">
-                  {tech.category}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-2 font-normal">
-                {tech.desc}
-              </p>
-            </div>
+    <section id="skills" className="section-spacing">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">04 / MY TOOLKIT</p>
+          <h2 className="section-title">The tools behind <em>the ideas.</em></h2>
+        </div>
+      </div>
+      <div className="skill-groups">
+        {groups.map((group, index) => (
+          <div className="skill-group" key={group.title}>
+            <span className="eyebrow">0{index + 1}</span>
+            <h3>{group.title}</h3>
+            {techStack
+              .filter((tech) => group.names.includes(tech.name))
+              .map((tech) => (
+                <div key={tech.name} className="skill-row">
+                  <strong>{tech.name}</strong>
+                  <span>{tech.desc}</span>
+                </div>
+              ))}
           </div>
         ))}
       </div>
