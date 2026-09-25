@@ -9,12 +9,14 @@ export interface Repository {
 }
 
 export interface Project {
+  id: string;
   title: string;
   category: string;
   type: string;
   description: string;
   tags: string[];
   githubUrl?: string;
+  demoUrl?: string;
   image?: string;
   imageWidth?: number;
   imageHeight?: number;
@@ -38,4 +40,29 @@ export interface TechSkill {
   name: string;
   category: string;
   desc: string;
+}
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  desc: string;
+}
+
+export interface SkillGroup {
+  id: string;
+  title: string;
+  skills: SkillItem[];
+}
+
+export interface ProfileData {
+  name: string;
+  avatarUrl: string;
+  caption: string;
+  note: string;
+  email: string;
+  location: string;
+  university: string;
+  cvUrl: string;
+  github: string;
+  linkedin: string;
 }
