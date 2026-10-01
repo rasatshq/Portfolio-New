@@ -46,6 +46,15 @@ describe("Admin Authentication", () => {
 
   it("verifies the correct password", () => {
     expect(verifyAdminPassword("testpass123")).toBe(true);
+    expect(verifyAdminPassword("  testpass123  ")).toBe(true);
+  });
+
+  it("handles whitespace or quotes in environment variable", () => {
+    vi.stubEnv("ADMIN_PASSWORD", "  quotedpass  ");
+    expect(verifyAdminPassword("quotedpass")).toBe(true);
+
+    vi.stubEnv("ADMIN_PASSWORD", '"doublequoted"');
+    expect(verifyAdminPassword("doublequoted")).toBe(true);
   });
 
   it("rejects an incorrect password", () => {

@@ -15,7 +15,7 @@ export function getAdminPassword(): string {
   if (!pwd) {
     return "admin123";
   }
-  return pwd;
+  return pwd.trim().replace(/^["']|["']$/g, "");
 }
 
 /**
@@ -36,9 +36,12 @@ export function verifyAdminPassword(password: string): boolean {
   const expected = getAdminPassword();
   if (!password || !expected) return false;
 
+  const cleanPassword = password.trim();
+  const cleanExpected = expected.trim();
+
   // Timing safe comparison to prevent timing attacks
-  const bufA = Buffer.from(password);
-  const bufB = Buffer.from(expected);
+  const bufA = Buffer.from(cleanPassword);
+  const bufB = Buffer.from(cleanExpected);
   if (bufA.length !== bufB.length) return false;
   return crypto.timingSafeEqual(bufA, bufB);
 }
