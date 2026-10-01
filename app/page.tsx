@@ -11,8 +11,11 @@ import { Footer } from "@/components/Footer";
 import { getProjects } from "@/lib/projects";
 import { getSkills } from "@/lib/skills";
 import { getProfile } from "@/lib/profile";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 export default async function Portfolio() {
+  await connection();
   const [projects, skills, profile] = await Promise.all([
     getProjects(),
     getSkills(),
@@ -28,14 +31,14 @@ export default async function Portfolio() {
       <main id="main" className="page-container">
         <Hero profile={profile} />
         <Projects initialProjects={projects} />
-        <About />
-        <Experience />
+        <About profile={profile} />
+        <Experience cvUrl={profile.cvUrl} />
         <TechStack initialGroups={skills} />
-        <GitHubRepos />
+        <Suspense fallback={<p className="section-spacing" role="status">Loading GitHub repositories…</p>}><GitHubRepos githubUrl={profile.github} /></Suspense>
         <Languages />
-        <Contact />
+        <Contact profile={profile} />
       </main>
-      <Footer />
+      <Footer profile={profile} />
     </div>
   );
 }

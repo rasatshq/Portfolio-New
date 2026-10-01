@@ -4,7 +4,7 @@
     "title": "Prince E-Commerce",
     "category": "Full Stack",
     "type": "Full Stack Web App",
-    "description": "Full-stack e-commerce platform built with Laravel 12, Livewire 3, and Filament 5. Features product variant & size stock management, seamless guest-to-user cart merge, Midtrans Snap payment gateway integration, and a complete admin panel for order and inventory management.",
+    "description": "An online store built with Laravel 12, Livewire 3, and Filament 5. Tracks stock by product variant and size, merges guest carts on sign-in, and handles payments through Midtrans Snap. Includes an admin panel for orders and inventory.",
     "tags": [
       "Laravel 12",
       "Livewire 3",
@@ -40,7 +40,7 @@
     "title": "Prince POS Kasir",
     "category": "Frontend",
     "type": "Web POS System",
-    "description": "A modern responsive Point of Sale (POS) cashier web application built with clean modular JavaScript, supporting product transaction handling, order calculations, and streamlined checkout.",
+    "description": "A browser-based cashier application built with JavaScript. Handles product transactions, calculates order totals, and manages checkout in a responsive interface.",
     "tags": [
       "JavaScript",
       "HTML5",
@@ -57,7 +57,7 @@
     "title": "Cafe Manjaro Web Interface",
     "category": "Frontend",
     "type": "Interactive POS & UI",
-    "description": "A responsive cashier system and cafe landing page focused on intuitive order workflows and a sleek modern dark interface.",
+    "description": "A cashier system and cafe landing page with a dark interface. Supports order workflows across desktop and mobile screens.",
     "tags": [
       "HTML5",
       "CSS3",

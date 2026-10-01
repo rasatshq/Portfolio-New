@@ -3,55 +3,9 @@ import type { Repository } from "@/types/portfolio";
 const GITHUB_REPOSITORIES_URL =
   "https://api.github.com/users/rasatshq/repos?sort=updated&per_page=4";
 
-export const FALLBACK_REPOSITORIES: Repository[] = [
-  {
-    id: 103,
-    name: "indonesian-judol-bilstm",
-    description:
-      "Deep Learning BiLSTM text classifier to detect Indonesian online gambling (judol) promotions, with de-obfuscation pipeline and Streamlit SOC dashboard.",
-    html_url: "https://github.com/rasatshq/indonesian-judol-bilstm",
-    stargazers_count: 0,
-    language: "Python",
-    updated_at: "2025-02-18T14:30:00Z",
-  },
-  {
-    id: 104,
-    name: "prince-ecommerce",
-    description:
-      "Full-stack e-commerce platform with Laravel 12, Livewire 3, Filament 5, product variant stock, guest-to-user cart merge, and Midtrans Snap checkout.",
-    html_url: "https://github.com/rasatshq/prince-ecommerce",
-    stargazers_count: 0,
-    language: "PHP",
-    updated_at: "2025-02-10T09:15:00Z",
-  },
-  {
-    id: 100,
-    name: "Aplikasi-Pos-kasir",
-    description:
-      "A modern responsive Point of Sale (POS) cashier web application built with JavaScript.",
-    html_url: "https://github.com/rasatshq/Aplikasi-Pos-kasir",
-    stargazers_count: 0,
-    language: "JavaScript",
-    updated_at: "2024-11-25T16:45:00Z",
-  },
-  {
-    id: 101,
-    name: "cafe-manjaro",
-    description:
-      "A responsive cashier POS system and cafe landing page interface with dark aesthetics.",
-    html_url: "https://github.com/rasatshq/cafe-manjaro",
-    stargazers_count: 1,
-    language: "JavaScript",
-    updated_at: "2024-10-14T11:20:00Z",
-  },
-];
+export const FALLBACK_REPOSITORIES: Repository[] = [];
 
-/**
- * Fetches the latest public repositories from GitHub.
- * Aborts automatically after 5 s to avoid hanging the render.
- * Falls back to FALLBACK_REPOSITORIES on any network error, non-OK status,
- * or empty response -- so this function never throws.
- */
+// Keep the public API array contract; unavailable data renders an honest empty state.
 export async function getGithubRepos(): Promise<Repository[]> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5_000);

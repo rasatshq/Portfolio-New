@@ -104,7 +104,7 @@ export default function RootLayout({
       lang="en"
       className={`h-full scroll-smooth antialiased ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-cyan-500 selection:text-white">
+      <body className="min-h-full flex flex-col">
         {children}
       </body>
     </html>

@@ -16,7 +16,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-root min-h-screen text-[var(--foreground)] selection:bg-teal-200">
+    <div lang="id" className="admin-root min-h-screen text-[var(--foreground)] selection:bg-teal-200">
       {children}
     </div>
   );

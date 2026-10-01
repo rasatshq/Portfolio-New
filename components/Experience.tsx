@@ -1,7 +1,6 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { ExperienceItem } from "@/types/portfolio";
-import { PROFILE } from "@/constants/profile";
 
 
 const experienceAndEducation: ExperienceItem[] = [
@@ -9,10 +8,10 @@ const experienceAndEducation: ExperienceItem[] = [
     type: "Education",
     institution: "Universitas Komputer Indonesia (UNIKOM)",
     role: "Bachelor of Informatics Engineering",
-    period: "2024 — Present",
+    period: "2024 – Present",
     location: "Bandung, West Java",
     description:
-      "Developing a rigorous foundation in software logic, database engineering, and data-driven systems. Actively integrating AI-assisted workflows to accelerate prototyping and problem solving.",
+      "Studying software logic, databases, and data-driven systems. Putting coursework into practice through web projects, data analysis, and Cisco networking labs.",
     tags: [
       "Data Science",
       "Python (NumPy)",
@@ -27,10 +26,10 @@ const experienceAndEducation: ExperienceItem[] = [
     type: "Experience",
     institution: "Pesantren Islam Hidayatunnajah",
     role: "Arabic Language Teacher (Service Year)",
-    period: "June 2023 — July 2024",
+    period: "June 2023 – July 2024",
     location: "Bekasi Regency, West Java",
     description:
-      "Dedicated a full year to educating students, honing public speaking, classroom management, and structured discipline. Simplified complex linguistic concepts with high reliability and administrative leadership.",
+      "Taught Arabic during a year of service. Planned lessons, managed a classroom, and helped students understand unfamiliar language concepts.",
     tags: [
       "Classroom Management",
       "Public Speaking",
@@ -42,10 +41,10 @@ const experienceAndEducation: ExperienceItem[] = [
   },
 ];
 
-export function Experience() {
+export function Experience({ cvUrl }: { cvUrl: string }) {
   return (
     <section id="experience" className="section-spacing experience-section">
-      <div className="section-heading"><div><p className="eyebrow">03 / THE JOURNEY</p><h2 className="section-title">Learning. Teaching.<br /><em>Moving forward.</em></h2></div><a className="button-text" href={PROFILE.cvUrl} target="_blank" rel="noreferrer">Full Curriculum Vitae <ArrowUpRight size={17} /></a></div>
+      <div className="section-heading"><div><p className="eyebrow">03 / Experience & education</p><h2 className="section-title">Learning, in practice.</h2></div>{cvUrl && <a className="button-text" href={cvUrl} target="_blank" rel="noopener noreferrer">Download CV <ArrowUpRight size={17} aria-hidden="true" /></a>}</div>
       <div className="timeline">{experienceAndEducation.map(item => <article key={item.role} className="timeline-row"><div className="timeline-date"><span className="eyebrow">{item.type}</span><p>{item.period}</p></div><div><h3>{item.role}</h3><p className="institution">{item.institution}</p><p className="timeline-location">{item.location}</p><p className="timeline-description">{item.description}</p><div className="tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div></div></article>)}</div>
     </section>
   );

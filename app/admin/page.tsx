@@ -29,7 +29,9 @@ import {
 } from "lucide-react";
 import type { Project, SkillGroup, SkillItem, ProfileData } from "@/types/portfolio";
 import { DEFAULT_PROFILE } from "@/constants/profile";
-import { DEFAULT_SKILL_GROUPS, createUniqueSlug } from "@/constants/skills";
+import { createUniqueSlug } from "@/constants/skills";
+import { AdminDialog } from "@/components/AdminDialog";
+import { Portrait } from "@/components/Portrait";
 
 const CATEGORY_OPTIONS = [
   "Full Stack",
@@ -97,12 +99,10 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("projects");
 
-  // Projects State
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
 
-  // Project Edit / Create Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({
@@ -121,13 +121,11 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Project Delete confirmation
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Skills State (Toolkit)
-  const [skillGroups, setSkillGroups] = useState<SkillGroup[]>(DEFAULT_SKILL_GROUPS);
+  const [skillGroups, setSkillGroups] = useState<SkillGroup[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [savingSkills, setSavingSkills] = useState(false);
   const [skillModalOpen, setSkillModalOpen] = useState(false);
@@ -137,18 +135,15 @@ export default function AdminPage() {
   } | null>(null);
   const [skillForm, setSkillForm] = useState({ name: "", desc: "", targetGroupId: "" });
 
-  // Group Modal (Add / Edit Group Title)
   const [groupModalOpen, setGroupModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<SkillGroup | null>(null);
   const [groupTitleInput, setGroupTitleInput] = useState("");
 
-  // Profile & Hero State
   const [profileData, setProfileData] = useState<ProfileData>(DEFAULT_PROFILE);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileUploading, setProfileUploading] = useState(false);
 
-  // Toast feedback
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,11 +154,11 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Fetch Projects
   const fetchProjects = useCallback(async () => {
     setLoadingProjects(true);
     try {
       const res = await fetch("/api/projects", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to load projects");
       const data = await res.json();
       if (Array.isArray(data)) {
         setProjects(data);
@@ -175,13 +170,13 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Fetch Skills
   const fetchSkills = useCallback(async () => {
     setLoadingSkills(true);
     try {
       const res = await fetch("/api/admin/skills", { cache: "no-store" });
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (!res.ok) throw new Error("Failed to load skills");
+      if (Array.isArray(data)) {
         setSkillGroups(data);
       }
     } catch {
@@ -191,11 +186,11 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Fetch Profile
   const fetchProfile = useCallback(async () => {
     setLoadingProfile(true);
     try {
       const res = await fetch("/api/admin/profile", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to load profile");
       const data = await res.json();
       if (data && typeof data === "object") {
         setProfileData((prev) => ({ ...prev, ...data }));
@@ -207,7 +202,6 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Check auth on mount
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -269,7 +263,6 @@ export default function AdminPage() {
     }
   }
 
-  // --- PROJECT MANAGEMENT HANDLERS ---
   function openCreateModal() {
     setEditingProject(null);
     setFormData({
@@ -278,7 +271,7 @@ export default function AdminPage() {
       customCategory: "",
       type: "Full Stack Web App",
       description: "",
-      tagsString: "Laravel, Livewire, MySQL",
+      tagsString: "",
       githubUrl: "",
       demoUrl: "",
       image: "",
@@ -364,6 +357,8 @@ export default function AdminPage() {
       githubUrl: formData.githubUrl.trim() || undefined,
       demoUrl: formData.demoUrl.trim() || undefined,
       image: formData.image.trim() || undefined,
+      imageWidth: editingProject?.image === formData.image ? editingProject.imageWidth : undefined,
+      imageHeight: editingProject?.image === formData.image ? editingProject.imageHeight : undefined,
       accent: formData.accent,
       glow: formData.glow,
     };
@@ -434,11 +429,12 @@ export default function AdminPage() {
 
     try {
       const orderedIds = updated.map((p) => p.id);
-      await fetch("/api/admin/projects", {
+      const res = await fetch("/api/admin/projects", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderedIds }),
       });
+      if (!res.ok) throw new Error("Failed to save order");
       showToast("Urutan berhasil diperbarui!");
     } catch {
       showToast("Gagal menyimpan urutan baru", "error");
@@ -446,7 +442,6 @@ export default function AdminPage() {
     }
   }
 
-  // --- SKILLS (TOOLKIT) HANDLERS ---
   async function saveSkillsDirectly(groupsToSave: SkillGroup[], successMsg: string) {
     setSavingSkills(true);
     try {
@@ -459,9 +454,11 @@ export default function AdminPage() {
         showToast(successMsg);
       } else {
         showToast("Gagal menyimpan perubahan ke server", "error");
+        await fetchSkills();
       }
     } catch {
       showToast("Terjadi kesalahan jaringan", "error");
+      await fetchSkills();
     } finally {
       setSavingSkills(false);
     }
@@ -543,6 +540,7 @@ export default function AdminPage() {
   }
 
   function handleDeleteSkill(groupId: string, skillId: string) {
+    if (!confirm("Hapus skill ini dari portofolio?")) return;
     const updated = skillGroups.map((g) => {
       if (g.id === groupId) {
         return {
@@ -631,7 +629,6 @@ export default function AdminPage() {
     saveSkillsDirectly(updated, "Grup berhasil dihapus.");
   }
 
-  // --- PROFILE & FOTO HANDLERS ---
   async function handleProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -693,7 +690,6 @@ export default function AdminPage() {
 
   const totalSkillsCount = skillGroups.reduce((acc, g) => acc + g.skills.length, 0);
 
-  // Initial loading state
   if (authed === null) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#f4f6f8]">
@@ -705,7 +701,6 @@ export default function AdminPage() {
     );
   }
 
-  // Login Gate
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center p-5 bg-gradient-to-br from-[#f8faf9] via-[#edf3f1] to-[#f4f0f9]">
@@ -754,7 +749,7 @@ export default function AdminPage() {
             </div>
 
             {loginError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
+              <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                 <span>{loginError}</span>
               </div>
@@ -792,31 +787,30 @@ export default function AdminPage() {
     );
   }
 
-  // Authenticated Admin Dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8faf9] via-[#edf3f1] to-[#f4f0f9] pb-24">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-white/80 shadow-sm">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-18 flex items-center justify-between gap-4">
+        <div className="cms-header max-w-6xl mx-auto px-5 sm:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-[#087f75]">
               <Layers size={18} />
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-tight text-slate-900">
+                <h1 className="font-bold text-base tracking-tight text-slate-900">
                   Portfolio CMS
-                </span>
+                </h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-100 text-[#087f75] font-semibold">
-                  Admin Active
+                  Admin
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 font-mono">
                 {activeTab === "projects"
-                  ? "data/projects.json"
+                  ? "Proyek"
                   : activeTab === "skills"
-                  ? "data/skills.json"
-                  : "data/profile.json"}
+                  ? "Keahlian"
+                  : "Profil"}
               </p>
             </div>
           </div>
@@ -845,6 +839,7 @@ export default function AdminPage() {
             {activeTab === "skills" && (
               <button
                 onClick={openCreateGroupModal}
+                disabled={savingSkills || loadingSkills}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#087f75] hover:bg-[#076b63] text-white text-xs font-semibold transition shadow-md shadow-teal-700/20 cursor-pointer"
               >
                 <Plus size={16} />
@@ -864,9 +859,10 @@ export default function AdminPage() {
         </div>
 
         {/* CMS Tabs Bar */}
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 border-t border-slate-200/50 flex items-center gap-2 overflow-x-auto py-2">
+        <nav aria-label="CMS" className="cms-tabs max-w-6xl mx-auto px-5 sm:px-8 border-t border-slate-200/50 flex items-center gap-2 py-2">
           <button
             onClick={() => setActiveTab("projects")}
+            aria-pressed={activeTab === "projects"}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
               activeTab === "projects"
                 ? "bg-[#087f75] text-white shadow-sm"
@@ -874,11 +870,11 @@ export default function AdminPage() {
             }`}
           >
             <FolderGit2 size={15} />
-            <span>Proyek Portofolio</span>
+            <span>Proyek</span>
             <span
               className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                 activeTab === "projects"
-                  ? "bg-white/20 text-white"
+                  ? "bg-teal-900 text-white"
                   : "bg-slate-200 text-slate-700"
               }`}
             >
@@ -888,6 +884,7 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("skills")}
+            aria-pressed={activeTab === "skills"}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
               activeTab === "skills"
                 ? "bg-[#087f75] text-white shadow-sm"
@@ -895,11 +892,11 @@ export default function AdminPage() {
             }`}
           >
             <Wrench size={15} />
-            <span>My Toolkit (Skills)</span>
+            <span>Skills</span>
             <span
               className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                 activeTab === "skills"
-                  ? "bg-white/20 text-white"
+                  ? "bg-teal-900 text-white"
                   : "bg-slate-200 text-slate-700"
               }`}
             >
@@ -909,6 +906,7 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("profile")}
+            aria-pressed={activeTab === "profile"}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
               activeTab === "profile"
                 ? "bg-[#087f75] text-white shadow-sm"
@@ -916,16 +914,13 @@ export default function AdminPage() {
             }`}
           >
             <User size={15} />
-            <span>Foto Profil & Bio</span>
+            <span>Profil</span>
           </button>
-        </div>
+        </nav>
       </header>
 
       {/* Main Content Area */}
       <main className="max-w-6xl mx-auto px-5 sm:px-8 pt-8 space-y-6">
-        {/* ======================================================== */}
-        {/* TAB 1: PROJECTS MANAGEMENT                               */}
-        {/* ======================================================== */}
         {activeTab === "projects" && (
           <div className="space-y-6">
             {/* Banner Overview */}
@@ -938,11 +933,7 @@ export default function AdminPage() {
                   Kelola Proyek Portofolio
                 </h2>
                 <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
-                  Setiap perubahan disimpan ke{" "}
-                  <code className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px]">
-                    data/projects.json
-                  </code>{" "}
-                  dan langsung tampil di halaman utama portofolio.
+                  Tambahkan proyek, perbarui detail, dan atur urutannya di portofolio.
                 </p>
               </div>
 
@@ -976,7 +967,7 @@ export default function AdminPage() {
             </div>
 
             {/* Projects List */}
-            {filteredProjects.length === 0 ? (
+            {loadingProjects ? <p role="status">Memuat proyek…</p> : filteredProjects.length === 0 ? (
               <div className="p-12 text-center rounded-[24px] border border-slate-200 bg-white/70 backdrop-blur-md space-y-3">
                 <p className="text-sm font-semibold text-slate-700">Tidak ada proyek dalam kategori ini.</p>
                 <button
@@ -1107,11 +1098,8 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ======================================================== */}
-        {/* TAB 2: MY TOOLKIT / SKILLS MANAGEMENT                    */}
-        {/* ======================================================== */}
         {activeTab === "skills" && (
-          <div className="space-y-6">
+          <fieldset disabled={savingSkills || loadingSkills} className="space-y-6 min-w-0">
             {/* Banner Overview */}
             <div className="p-6 sm:p-8 rounded-[24px] border border-white/80 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <div className="space-y-1">
@@ -1119,14 +1107,10 @@ export default function AdminPage() {
                   04 / MY TOOLKIT CMS
                 </p>
                 <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                  The tools behind <em>the ideas.</em>
+                  Kelola Skills & Kategori
                 </h2>
                 <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
-                  Kelola kategori kolom dan daftar keahlian/tools yang tampil di bagian toolkit portofolio.
-                  Tersimpan di{" "}
-                  <code className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px]">
-                    data/skills.json
-                  </code>.
+                  Kelola kategori dan daftar keahlian yang tampil di portofolio. Perubahan tersimpan otomatis.
                 </p>
               </div>
 
@@ -1150,6 +1134,8 @@ export default function AdminPage() {
             </div>
 
             {/* Skill Groups Grid (Matching 3-column layout) */}
+            {loadingSkills && <p role="status">Memuat skills…</p>}
+            {!loadingSkills && skillGroups.length === 0 && <p>Belum ada kategori. Pilih Tambah Kategori untuk mulai menambahkan skill.</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {skillGroups.map((group, groupIndex) => (
                 <div
@@ -1195,7 +1181,7 @@ export default function AdminPage() {
                         group.skills.map((skill, skillIndex) => (
                           <div
                             key={skill.id || skill.name}
-                            className="py-3 flex items-center justify-between gap-3 group/item hover:bg-slate-50/60 -mx-2 px-2 rounded-lg transition"
+                            className="cms-skill-row py-3 flex items-center justify-between gap-3 group/item hover:bg-slate-50/60 -mx-2 px-2 rounded-lg transition"
                           >
                             <div className="min-w-0 flex-1">
                               <strong className="block text-xs font-semibold text-slate-900 truncate">
@@ -1206,7 +1192,7 @@ export default function AdminPage() {
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover/item:opacity-100 transition">
+                            <div className="cms-skill-actions flex items-center gap-1 shrink-0">
                               <button
                                 onClick={() => handleMoveSkill(group.id, skillIndex, "up")}
                                 disabled={skillIndex === 0}
@@ -1255,12 +1241,9 @@ export default function AdminPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </fieldset>
         )}
 
-        {/* ======================================================== */}
-        {/* TAB 3: FOTO PROFIL & HERO BIO                            */}
-        {/* ======================================================== */}
         {activeTab === "profile" && (
           <div className="space-y-6">
             {/* Banner Overview */}
@@ -1273,11 +1256,7 @@ export default function AdminPage() {
                   Ganti Foto Profil & Hero Section
                 </h2>
                 <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
-                  Perbarui foto profil portrait utama, caption foto, serta data kontak personal Anda.
-                  Tersimpan di{" "}
-                  <code className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px]">
-                    data/profile.json
-                  </code>.
+                  Perbarui foto, caption, dan kontak Anda, lalu pilih Simpan Foto & Data Profil.
                 </p>
               </div>
 
@@ -1306,29 +1285,8 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                {/* Hero Portrait Component Replica */}
                 <div className="relative pt-4 pb-2 px-2 max-w-[340px] mx-auto">
-                  <div className="portrait-wrap">
-                    <div className="portrait-frame">
-                      <Image
-                        src={profileData.avatarUrl || "/profile.jpg"}
-                        alt={profileData.name}
-                        fill
-                        sizes="340px"
-                        className="portrait"
-                      />
-                      <div className="portrait-caption">
-                        <span style={{ whiteSpace: "pre-line" }}>
-                          {profileData.caption || "A curious mind.\nA builder at heart."}
-                        </span>
-                        <ArrowUpRight size={24} />
-                      </div>
-                    </div>
-                    <span className="portrait-note">{profileData.note || "CODE. CREATE. KEEP LEARNING."}</span>
-                    <div className="portrait-stamp" aria-hidden="true">
-                      ✳
-                    </div>
-                  </div>
+                  <Portrait profile={profileData} />
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
@@ -1415,6 +1373,7 @@ export default function AdminPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-slate-400 font-mono">atau URL:</span>
                       <input
+                        aria-label="URL foto profil"
                         type="text"
                         value={profileData.avatarUrl}
                         onChange={(e) =>
@@ -1434,10 +1393,11 @@ export default function AdminPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
-                          Caption Foto (Overlay Glass)
+                        <label htmlFor="profile-caption" className="block text-xs font-medium text-slate-700 mb-1">
+                          Caption Foto
                         </label>
                         <textarea
+                          id="profile-caption"
                           rows={2}
                           value={profileData.caption}
                           onChange={(e) =>
@@ -1452,10 +1412,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
-                          Catatan Bawah (Note Badge)
+                        <label htmlFor="profile-note" className="block text-xs font-medium text-slate-700 mb-1">
+                          Catatan Bawah Foto
                         </label>
                         <input
+                          id="profile-note"
                           type="text"
                           value={profileData.note}
                           onChange={(e) =>
@@ -1479,10 +1440,11 @@ export default function AdminPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-name" className="block text-xs font-medium text-slate-700 mb-1">
                           Nama Lengkap
                         </label>
                         <input
+                          id="profile-name"
                           type="text"
                           value={profileData.name}
                           onChange={(e) =>
@@ -1493,10 +1455,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-location" className="block text-xs font-medium text-slate-700 mb-1">
                           Lokasi
                         </label>
                         <input
+                          id="profile-location"
                           type="text"
                           value={profileData.location}
                           onChange={(e) =>
@@ -1507,10 +1470,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-university" className="block text-xs font-medium text-slate-700 mb-1">
                           Universitas / Institusi
                         </label>
                         <input
+                          id="profile-university"
                           type="text"
                           value={profileData.university}
                           onChange={(e) =>
@@ -1521,10 +1485,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-email" className="block text-xs font-medium text-slate-700 mb-1">
                           Email
                         </label>
                         <input
+                          id="profile-email"
                           type="email"
                           value={profileData.email}
                           onChange={(e) =>
@@ -1535,10 +1500,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-github" className="block text-xs font-medium text-slate-700 mb-1">
                           URL GitHub
                         </label>
                         <input
+                          id="profile-github"
                           type="text"
                           value={profileData.github}
                           onChange={(e) =>
@@ -1549,10 +1515,11 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-linkedin" className="block text-xs font-medium text-slate-700 mb-1">
                           URL LinkedIn
                         </label>
                         <input
+                          id="profile-linkedin"
                           type="text"
                           value={profileData.linkedin}
                           onChange={(e) =>
@@ -1563,10 +1530,11 @@ export default function AdminPage() {
                       </div>
 
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                        <label htmlFor="profile-cv" className="block text-xs font-medium text-slate-700 mb-1">
                           Link CV
                         </label>
                         <input
+                          id="profile-cv"
                           type="text"
                           value={profileData.cvUrl}
                           onChange={(e) =>
@@ -1606,11 +1574,8 @@ export default function AdminPage() {
         )}
       </main>
 
-      {/* ======================================================== */}
-      {/* MODAL: CREATE / EDIT PROJECT                             */}
-      {/* ======================================================== */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+        <AdminDialog label={editingProject ? "Edit Proyek Portofolio" : "Tambah Proyek Baru"} onClose={() => setModalOpen(false)}>
           <div className="w-full max-w-2xl my-8 rounded-[28px] border border-white/90 bg-white/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -1623,6 +1588,7 @@ export default function AdminPage() {
               </div>
               <button
                 onClick={() => setModalOpen(false)}
+                aria-label="Tutup form proyek"
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X size={18} />
@@ -1633,10 +1599,11 @@ export default function AdminPage() {
               {/* Title & Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="project-title" className="block text-xs font-semibold text-slate-700 mb-1">
                     Judul Proyek *
                   </label>
                   <input
+                    id="project-title"
                     type="text"
                     required
                     value={formData.title}
@@ -1647,10 +1614,11 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="project-type" className="block text-xs font-semibold text-slate-700 mb-1">
                     Tipe / Subtitle
                   </label>
                   <input
+                    id="project-type"
                     type="text"
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -1663,10 +1631,11 @@ export default function AdminPage() {
               {/* Category */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="project-category" className="block text-xs font-semibold text-slate-700 mb-1">
                     Kategori
                   </label>
                   <select
+                    id="project-category"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#087f75]/30 focus:border-[#087f75]"
@@ -1682,10 +1651,11 @@ export default function AdminPage() {
 
                 {formData.category === "Custom" && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label htmlFor="project-custom-category" className="block text-xs font-semibold text-slate-700 mb-1">
                       Nama Kategori Custom *
                     </label>
                     <input
+                      id="project-custom-category"
                       type="text"
                       required
                       value={formData.customCategory}
@@ -1701,10 +1671,11 @@ export default function AdminPage() {
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="project-description" className="block text-xs font-semibold text-slate-700 mb-1">
                   Deskripsi Proyek *
                 </label>
                 <textarea
+                  id="project-description"
                   required
                   rows={3}
                   value={formData.description}
@@ -1718,10 +1689,11 @@ export default function AdminPage() {
 
               {/* Tags */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="project-tags" className="block text-xs font-semibold text-slate-700 mb-1">
                   Teknologi / Tags (Pisahkan dengan koma)
                 </label>
                 <input
+                  id="project-tags"
                   type="text"
                   value={formData.tagsString}
                   onChange={(e) =>
@@ -1735,10 +1707,11 @@ export default function AdminPage() {
               {/* GitHub & Demo Links */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="project-github" className="block text-xs font-semibold text-slate-700 mb-1">
                     Link GitHub Repository
                   </label>
                   <input
+                    id="project-github"
                     type="url"
                     value={formData.githubUrl}
                     onChange={(e) =>
@@ -1750,10 +1723,11 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="project-demo" className="block text-xs font-semibold text-slate-700 mb-1">
                     Link Live Demo
                   </label>
                   <input
+                    id="project-demo"
                     type="url"
                     value={formData.demoUrl}
                     onChange={(e) =>
@@ -1767,11 +1741,12 @@ export default function AdminPage() {
 
               {/* Screenshot Image Upload */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700">
+                <label htmlFor="project-image" className="block text-xs font-semibold text-slate-700">
                   Screenshot / Gambar Proyek
                 </label>
                 <div className="flex items-center gap-3">
                   <input
+                    id="project-image"
                     type="text"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
@@ -1881,14 +1856,11 @@ export default function AdminPage() {
               </div>
             </form>
           </div>
-        </div>
+        </AdminDialog>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL: DELETE PROJECT CONFIRMATION                       */}
-      {/* ======================================================== */}
       {deleteModalOpen && projectToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <AdminDialog label="Hapus Proyek Ini?" onClose={() => setDeleteModalOpen(false)}>
           <div className="w-full max-w-md p-6 rounded-[28px] border border-white/90 bg-white/95 backdrop-blur-2xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
               <Trash2 size={20} />
@@ -1903,10 +1875,7 @@ export default function AdminPage() {
                 <strong className="text-slate-800">
                   &ldquo;{projectToDelete.title}&rdquo;
                 </strong>
-                ? Tindakan ini akan menghapus data dari file{" "}
-                <code className="px-1 rounded bg-slate-100 font-mono text-[10px]">
-                  data/projects.json
-                </code>.
+                ? Proyek akan dihapus dari portofolio. Tindakan ini tidak dapat dibatalkan.
               </p>
             </div>
 
@@ -1938,14 +1907,11 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-        </div>
+        </AdminDialog>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL: ADD / EDIT SKILL (TOOLKIT)                        */}
-      {/* ======================================================== */}
       {skillModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <AdminDialog label={editingSkillInfo?.skill ? "Edit Skill" : "Tambah Skill Baru"} onClose={() => setSkillModalOpen(false)}>
           <div className="w-full max-w-md p-6 rounded-[28px] border border-white/90 bg-white/95 backdrop-blur-2xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-900">
@@ -1953,6 +1919,7 @@ export default function AdminPage() {
               </h3>
               <button
                 onClick={() => setSkillModalOpen(false)}
+                aria-label="Tutup form skill"
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
               >
                 <X size={16} />
@@ -1961,10 +1928,11 @@ export default function AdminPage() {
 
             <form onSubmit={handleSaveSkillModal} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="skill-category" className="block text-xs font-semibold text-slate-700 mb-1">
                   Kategori Kolom
                 </label>
                 <select
+                  id="skill-category"
                   value={skillForm.targetGroupId}
                   onChange={(e) =>
                     setSkillForm({ ...skillForm, targetGroupId: e.target.value })
@@ -1980,10 +1948,11 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="skill-name" className="block text-xs font-semibold text-slate-700 mb-1">
                   Nama Skill / Tool *
                 </label>
                 <input
+                  id="skill-name"
                   type="text"
                   required
                   value={skillForm.name}
@@ -1994,10 +1963,11 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="skill-description" className="block text-xs font-semibold text-slate-700 mb-1">
                   Deskripsi Singkat *
                 </label>
                 <input
+                  id="skill-description"
                   type="text"
                   required
                   value={skillForm.desc}
@@ -2026,14 +1996,11 @@ export default function AdminPage() {
               </div>
             </form>
           </div>
-        </div>
+        </AdminDialog>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL: ADD / EDIT SKILL GROUP TITLE                      */}
-      {/* ======================================================== */}
       {groupModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <AdminDialog label={editingGroup ? "Ubah Nama Kategori" : "Tambah Kategori Kolom Baru"} onClose={() => setGroupModalOpen(false)}>
           <div className="w-full max-w-md p-6 rounded-[28px] border border-white/90 bg-white/95 backdrop-blur-2xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-900">
@@ -2041,6 +2008,7 @@ export default function AdminPage() {
               </h3>
               <button
                 onClick={() => setGroupModalOpen(false)}
+                aria-label="Tutup form kategori"
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
               >
                 <X size={16} />
@@ -2049,10 +2017,11 @@ export default function AdminPage() {
 
             <form onSubmit={handleSaveGroupModal} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="group-title" className="block text-xs font-semibold text-slate-700 mb-1">
                   Nama Kategori / Judul Kolom *
                 </label>
                 <input
+                  id="group-title"
                   type="text"
                   required
                   value={groupTitleInput}
@@ -2080,12 +2049,13 @@ export default function AdminPage() {
               </div>
             </form>
           </div>
-        </div>
+        </AdminDialog>
       )}
 
       {/* Floating Toast Notification */}
       {toast && (
         <div
+          role="status"
           className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-xl flex items-center gap-2.5 text-xs font-medium animate-in slide-in-from-bottom-5 duration-200 ${
             toast.type === "success"
               ? "bg-slate-900/95 text-white border-white/20 shadow-slate-900/30"

@@ -19,8 +19,8 @@ export function Navbar() {
       <div className="nav-inner">
         <a href="#top" className="wordmark" aria-label="Rashad home">Rashad<span>.</span></a>
         <nav className="desktop-nav" aria-label="Main navigation">{links.map(link => <a key={link.href} href={link.href}>{link.label}</a>)}</nav>
-        <a href="#contact" className="nav-contact">Let’s Talk <ArrowUpRight size={16} /></a>
-        <button ref={toggle} className="menu-toggle" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label="Toggle navigation menu">{open ? <X /> : <Menu />}</button>
+        <a href="#contact" className="nav-contact">Contact <ArrowUpRight size={16} aria-hidden="true" /></a>
+        <button ref={toggle} className="menu-toggle" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label="Toggle navigation menu">{open ? "Close" : "Menu"}{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
       </div>
       {open && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">{[...links, {label: "Contact", href: "#contact"}].map(link => <a href={link.href} key={link.href} onClick={() => setOpen(false)}>{link.label}<ArrowUpRight size={16} /></a>)}</nav>}
     </header>

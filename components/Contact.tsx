@@ -1,43 +1,14 @@
 import { ArrowUpRight } from "lucide-react";
-import { PROFILE } from "@/constants/profile";
+import type { ProfileData } from "@/types/portfolio";
 
-export function Contact() {
+export function Contact({ profile }: { profile: ProfileData }) {
   return (
-    <section id="contact" className="contact-section">
-      <p className="eyebrow">LET’S MAKE SOMETHING MEANINGFUL</p>
-      <div className="contact-heading">
-        <h2>
-          Good things start
-          <br />
-          with <em>a conversation.</em>
-        </h2>
-        <a
-          className="contact-arrow"
-          href={`mailto:${PROFILE.email}`}
-          aria-label="Start a conversation via email"
-        >
-          <ArrowUpRight />
-        </a>
-      </div>
+    <section id="contact" className="contact-section" aria-labelledby="contact-title">
+      <p className="eyebrow">06 / Get in touch</p>
+      <div className="contact-heading"><h2 id="contact-title">Have something<br />in mind?</h2><p>Tell me about your project,<br />ask about my work,<br />or just say hello.</p></div>
       <div className="contact-bottom">
-        <div>
-          <p>
-            Have an idea, a project, or just want to say hello?
-            <br />
-            I’d love to hear from you.
-          </p>
-          <div className="contact-socials">
-            <a href={PROFILE.github} target="_blank" rel="noreferrer">
-              GitHub <ArrowUpRight size={13} />
-            </a>
-            <a href={PROFILE.linkedin} target="_blank" rel="noreferrer">
-              LinkedIn <ArrowUpRight size={13} />
-            </a>
-          </div>
-        </div>
-        <a href={`mailto:${PROFILE.email}`}>
-          {PROFILE.email} <ArrowUpRight size={18} />
-        </a>
+        {profile.email && <a className="contact-email" href={`mailto:${profile.email}`}>{profile.email}<ArrowUpRight size={24} aria-hidden="true" /></a>}
+        <div className="contact-socials">{profile.github && <a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={15} aria-hidden="true" /></a>}{profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn <ArrowUpRight size={15} aria-hidden="true" /></a>}</div>
       </div>
     </section>
   );

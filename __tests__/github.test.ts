@@ -54,7 +54,7 @@ describe("getGithubRepos()", () => {
     const result = await getGithubRepos();
 
     expect(result).toEqual(FALLBACK_REPOSITORIES);
-    expect(result.length).toBeGreaterThan(0);
+    expect(result).toHaveLength(0);
   });
 
   it("returns fallback when GitHub API returns an empty array", async () => {
