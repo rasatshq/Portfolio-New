@@ -1,42 +1,26 @@
-import fs from "fs/promises";
-import path from "path";
 import type { Project } from "@/types/portfolio";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const PROJECTS_FILE = path.join(DATA_DIR, "projects.json");
-
 import { DEFAULT_PROJECTS } from "@/constants/projects";
+import { readCmsJson, writeCmsJson } from "@/lib/storage";
+
 export { DEFAULT_PROJECTS };
 
 /**
- * Reads projects from data/projects.json.
- * If file does not exist, it initializes with DEFAULT_PROJECTS.
+ * Reads projects from configured storage (Vercel Blob, Redis, GitHub, or data/projects.json).
+ * If missing, initializes with DEFAULT_PROJECTS.
  */
 export async function getProjects(): Promise<Project[]> {
-  try {
-    const content = await fs.readFile(PROJECTS_FILE, "utf-8");
-    const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) {
-      return parsed as Project[];
-    }
-    return DEFAULT_PROJECTS;
-  } catch {
-    // If file doesn't exist, create it with defaults
-    try {
-      await saveProjects(DEFAULT_PROJECTS);
-    } catch {
-      // ignore write error in read-only environments
-    }
-    return DEFAULT_PROJECTS;
-  }
+  return readCmsJson<Project[]>(
+    "projects.json",
+    DEFAULT_PROJECTS,
+    (val): val is Project[] => Array.isArray(val)
+  );
 }
 
 /**
- * Writes projects array to data/projects.json.
+ * Writes projects array to configured storage.
  */
 export async function saveProjects(projects: Project[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(PROJECTS_FILE, JSON.stringify(projects, null, 2), "utf-8");
+  await writeCmsJson("projects.json", projects);
 }
 
 /**

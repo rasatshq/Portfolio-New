@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import type { Project } from "@/types/portfolio";
+import { isValidImageSrc, shouldBypassImageOptimization } from "@/lib/urls";
 
 export function Projects({ initialProjects: projects }: { initialProjects: Project[] }) {
   const [category, setCategory] = useState<string | null>(null);
@@ -24,7 +25,19 @@ export function Projects({ initialProjects: projects }: { initialProjects: Proje
         {filtered.length === 0 && <p className="empty-state">No projects to show{category ? " in this category" : " yet"}.</p>}
         {filtered.map(project => (
           <article key={project.id} className={`project-entry ${project.image ? "has-image" : "text-project"}`}>
-            {project.image && <div className="project-art"><Image src={project.image} alt={`${project.title} application screenshot`} width={project.imageWidth ?? 1440} height={project.imageHeight ?? 900} sizes="(max-width: 760px) 100vw, 750px" className="project-screenshot" /></div>}
+            {project.image && isValidImageSrc(project.image) && (
+              <div className="project-art">
+                <Image
+                  src={project.image}
+                  alt={`${project.title} application screenshot`}
+                  width={project.imageWidth ?? 1440}
+                  height={project.imageHeight ?? 900}
+                  unoptimized={shouldBypassImageOptimization(project.image)}
+                  sizes="(max-width: 760px) 100vw, 750px"
+                  className="project-screenshot"
+                />
+              </div>
+            )}
             <div className="project-details">
               <p className="project-meta"><span>{String(projects.indexOf(project) + 1).padStart(2, "0")}</span>{project.category}</p>
               <h3>{project.title}</h3>

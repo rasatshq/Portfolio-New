@@ -32,6 +32,22 @@ import { DEFAULT_PROFILE } from "@/constants/profile";
 import { createUniqueSlug } from "@/constants/skills";
 import { AdminDialog } from "@/components/AdminDialog";
 import { Portrait } from "@/components/Portrait";
+import {
+  isValidImageSrc,
+  normalizeImageInput,
+  normalizeLinkUrl,
+  shouldBypassImageOptimization,
+} from "@/lib/urls";
+
+async function parseJsonResponse<T = Record<string, unknown>>(res: Response): Promise<T | null> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
 
 const CATEGORY_OPTIONS = [
   "Full Stack",
@@ -120,6 +136,7 @@ export default function AdminPage() {
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [failedProjectImage, setFailedProjectImage] = useState<string | null>(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
@@ -143,6 +160,13 @@ export default function AdminPage() {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileUploading, setProfileUploading] = useState(false);
+  const [failedProfileImage, setFailedProfileImage] = useState<string | null>(null);
+  const [storageStatus, setStorageStatus] = useState<{
+    mode: string;
+    writable: boolean;
+    label: string;
+    warning?: string;
+  } | null>(null);
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -157,9 +181,9 @@ export default function AdminPage() {
   const fetchProjects = useCallback(async () => {
     setLoadingProjects(true);
     try {
-      const res = await fetch("/api/projects", { cache: "no-store" });
+      const res = await fetch("/api/admin/projects", { cache: "no-store" });
       if (!res.ok) throw new Error("Failed to load projects");
-      const data = await res.json();
+      const data = await parseJsonResponse<Project[]>(res);
       if (Array.isArray(data)) {
         setProjects(data);
       }
@@ -208,6 +232,9 @@ export default function AdminPage() {
         const res = await fetch("/api/admin/check");
         const data = await res.json();
         setAuthed(Boolean(data.authenticated));
+        if (data.storage) {
+          setStorageStatus(data.storage);
+        }
         if (data.authenticated) {
           fetchProjects();
           fetchSkills();
@@ -242,6 +269,12 @@ export default function AdminPage() {
 
       setAuthed(true);
       setPassword("");
+      fetch("/api/admin/check")
+        .then((r) => parseJsonResponse<{ storage?: typeof storageStatus }>(r))
+        .then((checkData) => {
+          if (checkData?.storage) setStorageStatus(checkData.storage);
+        })
+        .catch(() => {});
       fetchProjects();
       fetchSkills();
       fetchProfile();
@@ -265,6 +298,7 @@ export default function AdminPage() {
 
   function openCreateModal() {
     setEditingProject(null);
+    setFailedProjectImage(null);
     setFormData({
       title: "",
       category: "Full Stack",
@@ -283,6 +317,7 @@ export default function AdminPage() {
 
   function openEditModal(project: Project) {
     setEditingProject(project);
+    setFailedProjectImage(null);
     const isStandardCategory = CATEGORY_OPTIONS.includes(project.category);
     setFormData({
       title: project.title,
@@ -313,12 +348,13 @@ export default function AdminPage() {
         method: "POST",
         body,
       });
-      const data = await res.json();
+      const data = await parseJsonResponse<{ url?: string; error?: string }>(res);
 
-      if (!res.ok) {
-        showToast(data.error || "Upload gagal", "error");
+      if (!res.ok || !data?.url) {
+        showToast(data?.error || `Upload gagal (HTTP ${res.status})`, "error");
       } else {
-        setFormData((prev) => ({ ...prev, image: data.url }));
+        setFailedProjectImage(null);
+        setFormData((prev) => ({ ...prev, image: data.url! }));
         showToast("Gambar berhasil di-upload!");
       }
     } catch {
@@ -333,6 +369,24 @@ export default function AdminPage() {
     e.preventDefault();
     if (!formData.title.trim() || !formData.description.trim()) {
       showToast("Judul dan deskripsi wajib diisi.", "error");
+      return;
+    }
+
+    const githubCheck = normalizeLinkUrl(formData.githubUrl);
+    if (!githubCheck.ok) {
+      showToast(`Link GitHub: ${githubCheck.error}`, "error");
+      return;
+    }
+
+    const demoCheck = normalizeLinkUrl(formData.demoUrl);
+    if (!demoCheck.ok) {
+      showToast(`Link Live Demo: ${demoCheck.error}`, "error");
+      return;
+    }
+
+    const imageCheck = normalizeImageInput(formData.image);
+    if (!imageCheck.ok) {
+      showToast(`Gambar Proyek: ${imageCheck.error}`, "error");
       return;
     }
 
@@ -354,11 +408,17 @@ export default function AdminPage() {
       type: formData.type.trim() || "Web App",
       description: formData.description.trim(),
       tags,
-      githubUrl: formData.githubUrl.trim() || undefined,
-      demoUrl: formData.demoUrl.trim() || undefined,
-      image: formData.image.trim() || undefined,
-      imageWidth: editingProject?.image === formData.image ? editingProject.imageWidth : undefined,
-      imageHeight: editingProject?.image === formData.image ? editingProject.imageHeight : undefined,
+      githubUrl: githubCheck.value,
+      demoUrl: demoCheck.value,
+      image: imageCheck.value,
+      imageWidth:
+        imageCheck.value && editingProject?.image === imageCheck.value
+          ? editingProject.imageWidth
+          : null,
+      imageHeight:
+        imageCheck.value && editingProject?.image === imageCheck.value
+          ? editingProject.imageHeight
+          : null,
       accent: formData.accent,
       glow: formData.glow,
     };
@@ -371,9 +431,9 @@ export default function AdminPage() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await parseJsonResponse<{ error?: string }>(res);
       if (!res.ok) {
-        showToast(data.error || "Gagal menyimpan project", "error");
+        showToast(data?.error || `Gagal menyimpan project (HTTP ${res.status})`, "error");
       } else {
         showToast(
           isEdit ? "Project berhasil diperbarui!" : "Project baru berhasil ditambahkan!"
@@ -642,13 +702,14 @@ export default function AdminPage() {
         method: "POST",
         body,
       });
-      const data = await res.json();
+      const data = await parseJsonResponse<{ url?: string; error?: string }>(res);
 
-      if (!res.ok) {
-        showToast(data.error || "Upload foto profil gagal", "error");
+      if (!res.ok || !data?.url) {
+        showToast(data?.error || `Upload foto profil gagal (HTTP ${res.status})`, "error");
       } else {
-        setProfileData((prev) => ({ ...prev, avatarUrl: data.url }));
-        showToast("Foto profil baru berhasil di-upload!");
+        setFailedProfileImage(null);
+        setProfileData((prev) => ({ ...prev, avatarUrl: data.url! }));
+        showToast("Foto profil baru berhasil di-upload! Klik Simpan Foto & Data Profil untuk menerapkan.");
       }
     } catch {
       showToast("Gagal mengunggah foto profil", "error");
@@ -660,19 +721,57 @@ export default function AdminPage() {
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
+
+    const avatarCheck = normalizeImageInput(profileData.avatarUrl);
+    if (!avatarCheck.ok) {
+      showToast(`URL Foto Profil: ${avatarCheck.error}`, "error");
+      return;
+    }
+
+    const githubCheck = normalizeLinkUrl(profileData.github);
+    if (!githubCheck.ok) {
+      showToast(`URL GitHub: ${githubCheck.error}`, "error");
+      return;
+    }
+
+    const linkedinCheck = normalizeLinkUrl(profileData.linkedin);
+    if (!linkedinCheck.ok) {
+      showToast(`URL LinkedIn: ${linkedinCheck.error}`, "error");
+      return;
+    }
+
+    const cvCheck = normalizeLinkUrl(profileData.cvUrl);
+    if (!cvCheck.ok) {
+      showToast(`Link CV: ${cvCheck.error}`, "error");
+      return;
+    }
+
+    const payload: ProfileData = {
+      ...profileData,
+      avatarUrl: avatarCheck.value || "/profile.jpg",
+      github: githubCheck.value,
+      linkedin: linkedinCheck.value,
+      cvUrl: cvCheck.value,
+    };
+
     setSavingProfile(true);
 
     try {
       const res = await fetch("/api/admin/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await parseJsonResponse<{ error?: string; profile?: ProfileData }>(res);
       if (!res.ok) {
-        showToast(data.error || "Gagal menyimpan profil", "error");
+        showToast(data?.error || `Gagal menyimpan profil (HTTP ${res.status})`, "error");
       } else {
+        if (data?.profile) {
+          setProfileData(data.profile);
+        } else {
+          setProfileData(payload);
+        }
         showToast("Foto profil & data berhasil disimpan!");
       }
     } catch {
@@ -921,6 +1020,15 @@ export default function AdminPage() {
 
       {/* Main Content Area */}
       <main className="max-w-6xl mx-auto px-5 sm:px-8 pt-8 space-y-6">
+        {storageStatus && !storageStatus.writable && storageStatus.warning && (
+          <div
+            role="alert"
+            className="p-4 sm:p-5 rounded-2xl border border-amber-300 bg-amber-50 text-amber-950 text-xs leading-relaxed space-y-1"
+          >
+            <p className="font-bold">Mode Read-Only ({storageStatus.label})</p>
+            <p>{storageStatus.warning}</p>
+          </div>
+        )}
         {activeTab === "projects" && (
           <div className="space-y-6">
             {/* Banner Overview */}
@@ -987,11 +1095,12 @@ export default function AdminPage() {
                     {/* Left: Thumbnail & Details */}
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="relative w-24 h-24 sm:w-28 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 flex items-center justify-center">
-                        {project.image ? (
+                        {project.image && isValidImageSrc(project.image) ? (
                           <Image
                             src={project.image}
                             alt={project.title}
                             fill
+                            unoptimized={shouldBypassImageOptimization(project.image)}
                             sizes="120px"
                             className="object-cover"
                           />
@@ -1308,13 +1417,23 @@ export default function AdminPage() {
 
                     <div className="p-5 rounded-2xl border-2 border-dashed border-teal-200/90 bg-teal-50/30 flex flex-col sm:flex-row items-center gap-4">
                       <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 bg-white shrink-0 shadow-sm">
-                        <Image
-                          src={profileData.avatarUrl || "/profile.jpg"}
-                          alt="Thumbnail Preview"
-                          fill
-                          sizes="80px"
-                          className="object-cover"
-                        />
+                        {(() => {
+                          const safeAvatarUrl = isValidImageSrc(profileData.avatarUrl)
+                            ? profileData.avatarUrl.trim()
+                            : "/profile.jpg";
+                          return (
+                            <Image
+                              src={safeAvatarUrl}
+                              alt="Thumbnail Preview"
+                              fill
+                              unoptimized={shouldBypassImageOptimization(safeAvatarUrl)}
+                              sizes="80px"
+                              className="object-cover"
+                              onLoad={() => setFailedProfileImage(null)}
+                              onError={() => setFailedProfileImage(safeAvatarUrl)}
+                            />
+                          );
+                        })()}
                       </div>
 
                       <div className="space-y-2 flex-1 text-center sm:text-left">
@@ -1357,9 +1476,10 @@ export default function AdminPage() {
 
                           <button
                             type="button"
-                            onClick={() =>
-                              setProfileData((prev) => ({ ...prev, avatarUrl: "/profile.jpg" }))
-                            }
+                            onClick={() => {
+                              setFailedProfileImage(null);
+                              setProfileData((prev) => ({ ...prev, avatarUrl: "/profile.jpg" }));
+                            }}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-medium transition cursor-pointer"
                             title="Kembalikan ke foto bawaan /profile.jpg"
                           >
@@ -1370,18 +1490,31 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400 font-mono">atau URL:</span>
-                      <input
-                        aria-label="URL foto profil"
-                        type="text"
-                        value={profileData.avatarUrl}
-                        onChange={(e) =>
-                          setProfileData((prev) => ({ ...prev, avatarUrl: e.target.value }))
-                        }
-                        placeholder="/profile.jpg atau https://..."
-                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-[#087f75]"
-                      />
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-slate-400 font-mono">atau URL:</span>
+                        <input
+                          aria-label="URL foto profil"
+                          type="text"
+                          value={profileData.avatarUrl}
+                          onChange={(e) => {
+                            setFailedProfileImage(null);
+                            setProfileData((prev) => ({ ...prev, avatarUrl: e.target.value }));
+                          }}
+                          placeholder="/profile.jpg atau https://..."
+                          className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-[#087f75]"
+                        />
+                      </div>
+                      {profileData.avatarUrl.trim() && !isValidImageSrc(profileData.avatarUrl) && (
+                        <p className="text-[11px] text-amber-700">
+                          Gunakan path diawali &quot;/&quot; (contoh: /profile.jpg) atau URL lengkap (https://...).
+                        </p>
+                      )}
+                      {failedProfileImage && failedProfileImage === profileData.avatarUrl.trim() && (
+                        <p className="text-[11px] text-rose-700">
+                          Gambar tidak dapat dimuat dari URL tersebut. Periksa kembali link foto Anda.
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -1712,7 +1845,8 @@ export default function AdminPage() {
                   </label>
                   <input
                     id="project-github"
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     value={formData.githubUrl}
                     onChange={(e) =>
                       setFormData({ ...formData, githubUrl: e.target.value })
@@ -1728,7 +1862,8 @@ export default function AdminPage() {
                   </label>
                   <input
                     id="project-demo"
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     value={formData.demoUrl}
                     onChange={(e) =>
                       setFormData({ ...formData, demoUrl: e.target.value })
@@ -1749,8 +1884,11 @@ export default function AdminPage() {
                     id="project-image"
                     type="text"
                     value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="/project-name.png atau upload file"
+                    onChange={(e) => {
+                      setFailedProjectImage(null);
+                      setFormData({ ...formData, image: e.target.value });
+                    }}
+                    placeholder="/project-name.png atau https://... atau upload file"
                     className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-[#087f75]/30 focus:border-[#087f75]"
                   />
                   <input
@@ -1781,16 +1919,29 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                {formData.image && (
+                {formData.image.trim() && isValidImageSrc(formData.image) && (
                   <div className="relative w-32 h-20 rounded-xl overflow-hidden border border-slate-200 mt-2 bg-slate-50">
                     <Image
-                      src={formData.image}
+                      src={formData.image.trim()}
                       alt="Preview"
                       fill
+                      unoptimized={shouldBypassImageOptimization(formData.image)}
                       sizes="140px"
                       className="object-cover"
+                      onLoad={() => setFailedProjectImage(null)}
+                      onError={() => setFailedProjectImage(formData.image.trim())}
                     />
                   </div>
+                )}
+                {formData.image.trim() && !isValidImageSrc(formData.image) && (
+                  <p className="text-[11px] text-amber-700">
+                    Gunakan path diawali &quot;/&quot; (contoh: /project.png) atau URL lengkap (https://...).
+                  </p>
+                )}
+                {failedProjectImage && failedProjectImage === formData.image.trim() && (
+                  <p className="text-[11px] text-rose-700">
+                    Preview gambar gagal dimuat. Pastikan link mengarah langsung ke file gambar.
+                  </p>
                 )}
               </div>
 

@@ -1,39 +1,26 @@
-import fs from "fs/promises";
-import path from "path";
 import type { ProfileData } from "@/types/portfolio";
 import { DEFAULT_PROFILE } from "@/constants/profile";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const PROFILE_FILE = path.join(DATA_DIR, "profile.json");
+import { readCmsJson, writeCmsJson } from "@/lib/storage";
 
 export { DEFAULT_PROFILE };
 
 /**
- * Reads profile data from data/profile.json.
- * If file does not exist, returns DEFAULT_PROFILE.
+ * Reads profile data from configured storage (Vercel Blob, Redis, GitHub, or data/profile.json).
+ * If missing, returns DEFAULT_PROFILE.
  */
 export async function getProfile(): Promise<ProfileData> {
-  try {
-    const content = await fs.readFile(PROFILE_FILE, "utf-8");
-    const parsed = JSON.parse(content);
-    if (parsed && typeof parsed === "object") {
-      return { ...DEFAULT_PROFILE, ...parsed };
-    }
-    return DEFAULT_PROFILE;
-  } catch {
-    try {
-      await saveProfile(DEFAULT_PROFILE);
-    } catch {
-      // ignore write error in read-only environment
-    }
-    return DEFAULT_PROFILE;
-  }
+  const data = await readCmsJson<Record<string, unknown>>(
+    "profile.json",
+    DEFAULT_PROFILE as unknown as Record<string, unknown>,
+    (val): val is Record<string, unknown> =>
+      Boolean(val) && typeof val === "object" && !Array.isArray(val)
+  );
+  return { ...DEFAULT_PROFILE, ...(data as Partial<ProfileData>) };
 }
 
 /**
- * Saves profile data to data/profile.json.
+ * Saves profile data to configured storage.
  */
 export async function saveProfile(data: ProfileData): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(PROFILE_FILE, JSON.stringify(data, null, 2), "utf-8");
+  await writeCmsJson("profile.json", data);
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "@/lib/auth";
 import { getSkills, saveSkills } from "@/lib/skills";
+import { getStorageErrorMessage } from "@/lib/urls";
 import type { SkillGroup } from "@/types/portfolio";
 
 export async function GET() {
@@ -48,10 +50,11 @@ export async function PUT(request: Request) {
     }
 
     await saveSkills(groups);
+    revalidatePath("/");
     return NextResponse.json({ success: true, groups });
   } catch (error) {
     return NextResponse.json(
-      { error: (error as Error).message || "Gagal menyimpan skills" },
+      { error: getStorageErrorMessage(error, "Gagal menyimpan skills") },
       { status: 500 }
     );
   }

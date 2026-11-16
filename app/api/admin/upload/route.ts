@@ -1,17 +1,33 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
 import path from "path";
 import { isAuthenticated } from "@/lib/auth";
 import { slugify } from "@/lib/projects";
+import { saveUploadedMedia } from "@/lib/storage";
+import { getStorageErrorMessage } from "@/lib/urls";
 
-const ALLOWED_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/webp",
-  "image/gif",
-  "image/svg+xml",
-];
+const MIME_TO_EXT: Record<string, string> = {
+  "image/png": ".png",
+  "image/x-png": ".png",
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/pjpeg": ".jpg",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/svg+xml": ".svg",
+  "image/avif": ".avif",
+};
+
+const EXT_TO_MIME: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".avif": "image/avif",
+};
+
+const ALLOWED_EXTENSIONS = new Set(Object.keys(EXT_TO_MIME));
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -32,11 +48,17 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    const rawExt = path.extname(file.name).toLowerCase();
+    const mimeType = (file.type || "").toLowerCase();
+    const mappedExt = MIME_TO_EXT[mimeType];
+    const hasValidMime = Boolean(mappedExt);
+    const hasValidExt = ALLOWED_EXTENSIONS.has(rawExt);
+
+    if (!hasValidMime && !((!mimeType || mimeType === "application/octet-stream") && hasValidExt)) {
       return NextResponse.json(
         {
           error:
-            "Format file tidak didukung. Harap upload PNG, JPG, JPEG, WEBP, GIF, atau SVG.",
+            "Format file tidak didukung. Harap upload PNG, JPG, JPEG, WEBP, GIF, AVIF, atau SVG.",
         },
         { status: 400 }
       );
@@ -53,23 +75,23 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     const originalName = path.parse(file.name).name;
-    const extension = path.extname(file.name).toLowerCase() || ".png";
-    const safeBaseName = slugify(originalName) || "project";
+    const extension = hasValidExt ? rawExt : mappedExt || ".png";
+    const safeBaseName = slugify(originalName) || "image";
     const fileName = `${safeBaseName}-${Date.now()}${extension}`;
+    const resolvedMime = EXT_TO_MIME[extension] || mimeType || "image/png";
 
-    const publicDir = path.join(process.cwd(), "public");
-    const filePath = path.join(publicDir, fileName);
-
-    await fs.writeFile(filePath, buffer);
+    const url = await saveUploadedMedia(fileName, buffer, resolvedMime);
 
     return NextResponse.json({
       success: true,
-      url: `/${fileName}`,
+      url,
       fileName,
     });
   } catch (error) {
     return NextResponse.json(
-      { error: (error as Error).message || "Gagal mengunggah gambar." },
+      {
+        error: getStorageErrorMessage(error, "Gagal mengunggah gambar."),
+      },
       { status: 500 }
     );
   }
